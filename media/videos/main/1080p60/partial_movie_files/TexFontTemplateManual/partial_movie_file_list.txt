@@ -1,0 +1,6 @@
+# This file is used internally by FFMPEG.
+file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/TexFontTemplateManual/450974505_1917379958_3438180709.mp4'
+file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/TexFontTemplateManual/34786186_4257974011_1829555735.mp4'
+file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/TexFontTemplateManual/34786186_1076466279_485345203.mp4'
+file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/TexFontTemplateManual/34786186_3694276391_251785646.mp4'
+file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/TexFontTemplateManual/34786186_125286499_2760788885.mp4'

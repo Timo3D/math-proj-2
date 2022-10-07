@@ -1,0 +1,4 @@
+# This file is used internally by FFMPEG.
+file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/SpiralInExample/2724823860_3157791478_223132457.mp4'
+file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/SpiralInExample/1164547788_329969645_3993149694.mp4'
+file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/SpiralInExample/1164547788_4220501136_793993427.mp4'
