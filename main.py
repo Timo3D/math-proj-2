@@ -1,53 +1,42 @@
+from typing_extensions import runtime
 from venv import create
 from manim import *
 import numpy as np
 
-class GraphExample(Scene):
-    def construct(self):
-        ax = Axes((-3, 10), (-1, 8))
-        ax.add_coordinates()
-        curve = ax.plot(lambda x: -0.5*x**3 + 2*x**2 + 1)
-        area = ax.get_area(graph=curve, x_range=(0,2))
-        self.play(
-            Create(ax, run_time=3, lag_ratio=0.1),
-            Create(curve, run_time=3, lag_ratio=0.1),
-        )
-
-        self.play(
-            Create(area, lag_ratio=0.5)
-        )
-
-        self.wait(1)
-
 class RiemannSums(Scene):
     def construct(self):
         title = Tex("Riemann Sums")
+        subtitle = Tex("0-4?")
         title.move_to(UP * 3 + RIGHT * 4.5)
+        subtitle.next_to(title, DOWN)
 
-        ax = Axes((-3, 10), (-1, 8))
-        ax.add_coordinates()
-        curve = ax.plot(lambda x: -0.5*x**3 + 2*x**2 + 2)
-
+        axes = Axes((-3, 10), (-1, 8))
+        axes.add_coordinates()
+        graph = axes.plot(lambda x: -0.5*x**3 + 2*x**2 + 2)
+        graph.set_color(YELLOW)
         self.play(
             Write(title),
-            Create(ax, run_time=3, lag_ratio=0.1),
-            Create(curve, run_time=3, lag_ratio=0.1),
+            Write(subtitle),
+            Create(axes, run_time = 3, lag_ratio = 0.1),
+            Create(graph, run_time = 3, lag_ratio = 0.1)
         )
-        
-        riemannSettings = {
-            "x_min": 0,
-            "x_max": 4,
-            "fill_opacity": 0.75,
-            "stroke_width": 0,
-        }
 
-        iterations = 6
+        all_rects = VGroup(*(
+            axes.get_riemann_rectangles(graph, (0, 4), dx).set_stroke(BLACK, np.round(4 * dx, 1), background=False)
+            for dx in [2**(-n) for n in range(0, 6)]
+        ))
+        rects = all_rects[0]
+        last_rects = all_rects[-1].copy()
+        last_rects.set_stroke(width=0)
 
-        self.rect_list = self.get_riemann_rectangles_list(curve, iterations, start_color = PURPLE, end_color = ORANGE, **riemannSettings)
+        self.play(FadeIn(last_rects, lag_ratio=0.1))
+        self.wait()
+        self.play(FadeIn(rects, lag_ratio=0.1), FadeOut(last_rects))
+        self.wait()
 
-        flat_rects = self.get_riemann_rectangles(dx = 0.25, start_color = invert_color(PURPLE), end_color = invert_color(ORANGE), **riemannSettings)
+        # Iterations
+        for new_rects in all_rects[1:]:
+            self.play(Transform(rects, new_rects))
+            self.wait(0.5)
 
-        rects = self.rect_list[0]
-
-        self.transform_between_riemann_rects(flat_rects, rects, replace_mobject_with_target_in_scene = True, run_time = 3)
         self.wait(1)
