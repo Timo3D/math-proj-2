@@ -1,7 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/businessIntegration/450974505_2913251269_223132457.mp4'
-file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/businessIntegration/34786186_329969645_3680756944.mp4'
-file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/businessIntegration/34786186_410344332_605127498.mp4'
-file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/businessIntegration/34786186_329969645_3299892944.mp4'
-file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/businessIntegration/34786186_1658472846_69906313.mp4'
-file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/businessIntegration/34786186_329969645_2453779080.mp4'

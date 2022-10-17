@@ -1,4 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/GraphExample/2724823860_716892937_223132457.mp4'
-file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/GraphExample/1164547788_2847798832_22336109.mp4'
-file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/GraphExample/1164547788_1076466279_2327686604.mp4'
