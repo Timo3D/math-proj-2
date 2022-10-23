@@ -1,9 +1,8 @@
 from shutil import move
 from tkinter import CENTER
-from typing_extensions import runtime
 from venv import create
+from click import style
 from manim import *
-import numpy as np
 
 class RiemannSums(Scene):
     def construct(self):
@@ -160,6 +159,46 @@ class carDistance(Scene):
         self.play(
             GrowFromCenter(brace),
             Write(brace_text)
+        )
+
+        self.wait()
+
+# class integrationIntro(Scene):
+#     def construct(self):
+        
+
+class lorenzCurve(Scene):
+    def construct(self):
+        axes = Axes(
+            x_range=[0, 1.2, 0.2],
+            y_range=[0, 1.2, 0.2],
+            axis_config={"color": GREEN},
+            tips = True,
+        )
+        axes.add_coordinates()
+
+        lorenzCurve = axes.plot(
+            lambda x: x**5,
+            x_range = [0, 1],
+            color = RED,
+            )
+
+        line = DashedLine(
+            axes.coords_to_point(0, 0),
+            axes.coords_to_point(1, 1),
+            color = YELLOW,
+        )
+
+        labels = axes.get_axis_labels(
+            x_label = Tex("Wealth Rank"),
+            y_label = Tex("Cumulative \% of Wealth"),
+        )
+
+        self.play(
+            Create(lorenzCurve, run_time = 3, lag_ratio = 0.1),
+            Create(axes, run_time = 3, lag_ratio = 0.1),
+            Create(labels, run_time = 3),
+            Create(line, run_time = 3),
         )
 
         self.wait()
