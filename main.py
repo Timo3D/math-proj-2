@@ -170,8 +170,8 @@ class carDistance(Scene):
 class lorenzCurve(Scene):
     def construct(self):
         axes = Axes(
-            x_range=[0, 1.2, 0.2],
-            y_range=[0, 1.2, 0.2],
+            x_range=[0, 1.1, 0.2],
+            y_range=[0, 1.1, 0.2],
             axis_config={"color": GREEN},
             tips = True,
         )
@@ -181,24 +181,25 @@ class lorenzCurve(Scene):
             lambda x: x**5,
             x_range = [0, 1],
             color = RED,
-            )
+        )
 
         line = DashedLine(
             axes.coords_to_point(0, 0),
             axes.coords_to_point(1, 1),
+            dash_length = 0.1,
             color = YELLOW,
         )
 
         labels = axes.get_axis_labels(
             x_label = Tex("Wealth Rank"),
-            y_label = Tex("Cumulative \% of Wealth"),
+            y_label = Tex("Cumulative Dist. of Wealth"),
         )
 
         self.play(
             Create(lorenzCurve, run_time = 3, lag_ratio = 0.1),
             Create(axes, run_time = 3, lag_ratio = 0.1),
-            Create(labels, run_time = 3),
-            Create(line, run_time = 3),
+            Create(labels, run_time = 3, lag_ratio = 0.1),
+            Create(line, run_time = 3, lag_ratio = 0.1),
         )
 
         self.wait()
