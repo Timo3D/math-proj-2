@@ -1,3 +1,4 @@
+from ctypes import alignment
 from shutil import move
 from tkinter import CENTER
 from venv import create
@@ -163,9 +164,35 @@ class carDistance(Scene):
 
         self.wait()
 
-# class integrationIntro(Scene):
-#     def construct(self):
-        
+class integrationIntro(Scene):
+    def construct(self):
+        line1 = Tex("Integration")
+        line1.move_to(UP * 2)
+
+        eng, bus, fin = line2 = Tex("Engineering", "Business", "Finances")
+        gr1 = VGroup(eng, bus, fin).arrange(DOWN, aligned_edge = LEFT)
+
+        deriv, integral, v_t, dt, equals, v_T = formula = MathTex(
+            "\\frac{d}{dT}", 
+            "\\int_0^T", "v(t)", "\\,dt", 
+            "=", "v(T)"
+        )
+        formula.set_color_by_tex("v", YELLOW)
+
+        self.play(Write(line1))
+        self.wait()
+        self.play(Write(gr1))
+        self.wait()
+        self.play(
+            FadeOut(eng),
+            FadeOut(bus),
+            fin.animate.next_to(line1, LEFT),
+        )
+        self.wait()
+        self.play(Write(VGroup(integral, v_t, dt)))
+        self.wait()
+        self.play(Write(VGroup(deriv, equals, v_T)))
+        self.wait()
 
 class lorenzCurve(Scene):
     def construct(self):
