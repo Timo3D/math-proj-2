@@ -169,7 +169,7 @@ class integrationIntro(Scene):
         line1 = Tex("Integration")
         line1.move_to(UP * 2)
 
-        eng, bus, fin = line2 = Tex("Engineering", "Business", "Finances")
+        eng, bus, fin = Tex("Engineering", "Business", "Finances")
         gr1 = VGroup(eng, bus, fin).arrange(DOWN, aligned_edge = LEFT)
 
         deriv, integral, v_t, dt, equals, v_T = formula = MathTex(
@@ -186,6 +186,7 @@ class integrationIntro(Scene):
         self.play(
             FadeOut(eng),
             FadeOut(bus),
+            fin.animate.set_color_by_tex(YELLOW),
             fin.animate.next_to(line1, LEFT),
         )
         self.wait()
@@ -193,9 +194,20 @@ class integrationIntro(Scene):
         self.wait()
         self.play(Write(VGroup(deriv, equals, v_T)))
         self.wait()
+        self.play(
+            FadeOut(fin),
+            FadeOut(line1),
+            FadeOut(formula),
+        )
+        self.wait()
 
 class lorenzCurve(Scene):
     def construct(self):
+        line1 = Tex("Lorenz Curve")
+
+        self.play(Write(line1))
+        self.wait()
+
         axes = Axes(
             x_range=[0, 1.1, 0.2],
             y_range=[0, 1.1, 0.2],
@@ -223,6 +235,7 @@ class lorenzCurve(Scene):
         )
 
         self.play(
+            line1.animate.move_to(5 * RIGHT + 3 * UP),
             Create(lorenzCurve, run_time = 3, lag_ratio = 0.1),
             Create(axes, run_time = 3, lag_ratio = 0.1),
             Create(labels, run_time = 3, lag_ratio = 0.1),
