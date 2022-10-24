@@ -280,7 +280,7 @@ class consumerProducerSurplus(Scene):
             x_range = [0, 1],
             color = BLUE,
         )
-        demandLabel = axes.get_graph_label(demandFunc, "Demand Function")
+        demandLabel = axes.get_graph_label(demandFunc, "Demand\\,Function")
         demandLabel.move_to(UP * 2 + LEFT * 3)
 
         supplyFunc = axes.plot(
@@ -288,7 +288,7 @@ class consumerProducerSurplus(Scene):
             x_range = [0, 1],
             color = RED,
         )
-        supplyLabel = axes.get_graph_label(supplyFunc, "Supply Function", direction = DL * 3 + LEFT * 3)
+        supplyLabel = axes.get_graph_label(supplyFunc, "Supply\\,Function", direction = DL * 3 + LEFT * 3)
 
         labels = axes.get_axis_labels(
             x_label = Tex("Quantity"),
@@ -330,6 +330,7 @@ class consumerProducerSurplus(Scene):
         polygon = always_redraw(get_rectangle)
 
         dot = Dot()
+        dot.set_z_index(1001)
         dot.add_updater(lambda x: x.move_to(axes.c2p(0.4178, 0.1746)))
 
         eqPtLbl = Tex("Equilibrium Point")
@@ -377,22 +378,75 @@ class consumerProducerSurplus(Scene):
             x_range = [0, 1],
         )
 
+        area0 = axes.get_area(demandFunc, [0, 0.4178], color = PURPLE, opacity = 0.5)
+        will2Spend = Tex("= Willingness to spend", color = PURPLE)
+        integral, v_t, dt = formula = MathTex(
+            "\\int_0^{q_s}", "demand\\,function (q)", "\\,dq",
+            color = BLUE,
+        )
+        formula.set_color_by_tex("{q_s}", PURPLE)
+        formula.set_color_by_tex("dq", PURPLE)
+
+        self.play(
+            DrawBorderThenFill(area0),
+            Write(formula),
+        )
+
+        self.wait()
+        will2Spend.next_to(formula, DOWN)
+        self.play(
+            Write(will2Spend),
+        )
+
+        self.wait()
+
         consSur = Tex("Consumer Surplus", color = RED)
-        consSur.move_to(LEFT * 1.8)
+        consSur.move_to(LEFT * 1.6)
         consExp = Tex("Consumer Expenditure", color = GREEN)
         consExp.move_to(DOWN * 2.5 + RIGHT * 2)
 
         area = axes.get_area(demandFunc, [0, 0.4178], bounded_graph = lineFake, color = RED, opacity = 0.5)
+        area.save_state()
 
         self.play(
+            Unwrite(formula, run_time = 1, lag_ratio = 0.1, reverse = False),
+            Unwrite(will2Spend, run_time = 1, lag_ratio = 0.1, reverse = False),
+            FadeOut(area0, run_time = 2, lag_ratio = 0.1),
             DrawBorderThenFill(polygon),
             DrawBorderThenFill(area),
             Write(consSur),
             Write(consExp),
         )
+        self.wait()
+
+        integral2, v_t2, dt2 = formula2 = MathTex(
+            "\\int_0^{q_s}", "{p_s}", "\\,dq",
+            color = GREEN,
+        ).move_to(DR + RIGHT)
+        eq2 = Tex("=", color = GREEN).next_to(formula2, DOWN)
+        formula2.set_color_by_tex("{p_s}", BLUE)
+
+        integral3, v_t3, dt3 = formula3 = MathTex(
+            "\\int_0^{q_s}", "demand\\,function (q) - {p_s}", "\\,dq",
+            color = RED,
+        ).move_to(UL)
+        eq3 = Tex("=", color = RED).next_to(consSur, LEFT)
+        formula3.set_color_by_tex("demand\\,function (q) - {p_s}", BLUE)
+
+        self.play(
+            Write(formula2),
+            Write(eq2),
+            Write(formula3),
+            Write(eq3),
+        )
 
         self.wait()
+
         self.play(
+            Unwrite(formula2, run_time = 1, lag_ratio = 0.1),
+            Unwrite(eq2, run_time = 1, lag_ratio = 0.1),
+            Unwrite(formula3, run_time = 1, lag_ratio = 0.1),
+            Unwrite(eq3, run_time = 1, lag_ratio = 0.1),
             Unwrite(consSur, run_time = 1, lag_ratio = 0.1),
             Unwrite(consExp, run_time = 1, lag_ratio = 0.1),
             Uncreate(polygon),
@@ -429,12 +483,19 @@ class consumerProducerSurplus(Scene):
             color = BLUE,
         )
         proSur.set_z_index(100)
+
+        consSur2 = Tex("Consumer Surplus", color = BLUE)
+        consSur2.move_to(LEFT * 1.8)
+        area.restore()
+        area.set_color(BLUE)
         self.play(
             Create(demandFunc2),
             Write(demandLabel, run_time = 1, lag_ratio = 0.1),
             Unwrite(neededRev, run_time = 1, lag_ratio = 0.1),
             FadeOut(area3),
             proSur.animate.move_to(DOWN * 2.5 + RIGHT * 0.7),
+            DrawBorderThenFill(area),
+            Write(consSur2, run_time = 1, lag_ratio = 0.1)
         )
 
         self.wait()
