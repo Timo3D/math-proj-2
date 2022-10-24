@@ -1,5 +1,6 @@
 # This file is used internally by FFMPEG.
 file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/lorenzCurve/2724823860_57363827_223132457.mp4'
 file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/lorenzCurve/1164547788_329969645_2864778658.mp4'
-file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/lorenzCurve/1164547788_3099384514_3441358288.mp4'
-file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/lorenzCurve/1164547788_329969645_3682801148.mp4'
+file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/lorenzCurve/1164547788_1055947709_640379333.mp4'
+file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/lorenzCurve/1164547788_4094333718_2418698605.mp4'
+file 'file:/mnt/c/Users/bugat/Desktop/math project/media/videos/main/1080p60/partial_movie_files/lorenzCurve/1164547788_329969645_3580475590.mp4'

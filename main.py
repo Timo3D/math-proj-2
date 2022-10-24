@@ -204,6 +204,9 @@ class integrationIntro(Scene):
 class lorenzCurve(Scene):
     def construct(self):
         line1 = Tex("Lorenz Curve")
+        line2 = Tex("Line of Equality")
+        line2.move_to(LEFT * 2.5)
+        line2.set_color(YELLOW)
 
         self.play(Write(line1))
         self.wait()
@@ -217,7 +220,7 @@ class lorenzCurve(Scene):
         axes.add_coordinates()
 
         lorenzCurve = axes.plot(
-            lambda x: x**5,
+            lambda x: x**3,
             x_range = [0, 1],
             color = RED,
         )
@@ -231,15 +234,207 @@ class lorenzCurve(Scene):
 
         labels = axes.get_axis_labels(
             x_label = Tex("Wealth Rank"),
-            y_label = Tex("Cumulative Dist. of Wealth"),
+            y_label = Tex("Cumulative Share of Wealth"),
         )
 
         self.play(
-            line1.animate.move_to(5 * RIGHT + 3 * UP),
-            Create(lorenzCurve, run_time = 3, lag_ratio = 0.1),
-            Create(axes, run_time = 3, lag_ratio = 0.1),
-            Create(labels, run_time = 3, lag_ratio = 0.1),
-            Create(line, run_time = 3, lag_ratio = 0.1),
+            Create(axes, run_time = 2, lag_ratio = 0.1),
+            Create(labels, run_time = 2, lag_ratio = 0.1),
+        )
+
+        self.play(
+            # line1.animate.set_fill(RED),
+            line1.animate.move_to(5 * RIGHT),
+            Write(line2),
+            Create(lorenzCurve, run_time = 2, lag_ratio = 0.1),
+            Create(line, run_time = 2, lag_ratio = 0.1),
+        )
+
+        self.wait()
+
+class consumerProducerSurplus(Scene):
+    def get_rectangle_corners(self, bottom_left, top_right):
+        return [
+            (top_right[0], top_right[1]),
+            (bottom_left[0], top_right[1]),
+            (bottom_left[0], bottom_left[0]),
+            (top_right[0], bottom_left[0]),
+        ]
+
+    def construct(self):
+        line1 = Tex("Consumer and Producer Surplus")
+
+        self.play(Write(line1))
+        self.wait()
+
+        axes = Axes(
+            x_range=[0, 1],
+            y_range=[0, 1],
+            axis_config={"color": GREEN},
+            tips = True,
+        )
+        axes.add_coordinates()
+
+        demandFunc = axes.plot(
+            lambda x: 1 / (x + 1)**5,
+            x_range = [0, 1],
+            color = BLUE,
+        )
+        demandLabel = axes.get_graph_label(demandFunc, "Demand Function")
+        demandLabel.move_to(UP * 2 + LEFT * 3)
+
+        supplyFunc = axes.plot(
+            lambda x: x**2,
+            x_range = [0, 1],
+            color = RED,
+        )
+        supplyLabel = axes.get_graph_label(supplyFunc, "Supply Function", direction = DL * 3 + LEFT * 3)
+
+        labels = axes.get_axis_labels(
+            x_label = Tex("Quantity"),
+            y_label = Tex("Price"),
+        )
+
+
+        self.play(
+            Create(axes, run_time = 2, lag_ratio = 0.1),
+            Create(labels, run_time = 2, lag_ratio = 0.1),
+        )
+
+        self.play(
+            line1.animate.move_to(UP * 3),
+            Create(demandFunc, run_time = 2, lag_ratio = 0.1),
+            Write(demandLabel),
+            Create(supplyFunc, run_time = 2, lag_ratio = 0.1),
+            Write(supplyLabel),
+        )
+
+        # self.wait()
+
+        t = ValueTracker(0)
+
+        def get_rectangle():
+            polygon = Polygon(
+                *[
+                    axes.c2p(*i)
+                    for i in self.get_rectangle_corners(
+                        (0, 0), (0.4178, 0.1746)
+                    )
+                ]
+            )
+            polygon.stroke_width = 1
+            polygon.set_fill(GREEN, opacity = 0.5)
+            polygon.set_stroke(YELLOW)
+            return polygon
+
+        polygon = always_redraw(get_rectangle)
+
+        dot = Dot()
+        dot.add_updater(lambda x: x.move_to(axes.c2p(0.4178, 0.1746)))
+
+        eqPtLbl = Tex("Equilibrium Point")
+        eqPtLbl.move_to(RIGHT + DOWN * 1.3)
+
+        lines = axes.get_lines_to_point(axes.c2p(0.4178, 0.1746), color = YELLOW)
+        
+        yLab1 = MathTex("p_e")
+        yLab1.next_to(axes.c2p(0, 0.1746), LEFT)
+        xLab1 = MathTex("q_e")
+        xLab1.next_to(axes.c2p(0.4178, 0), DOWN)
+        yLab2 = MathTex("p_s")
+        yLab2.next_to(axes.c2p(0, 0.1746), LEFT)
+        xLab2 = MathTex("q_s")
+        xLab2.next_to(axes.c2p(0.4178, 0), DOWN)
+
+        self.play(
+            Create(dot, run_time = 1, lag_ratio = 0.1),
+            Write(eqPtLbl, run_time = 1, lag_ratio = 0.1),
+            Create(lines, lag_ratio = 0.1),
+            Write(yLab1),
+            Write(xLab1),
+        )
+        self.wait()
+
+        supplyFunc.save_state()
+        supplyLabel.save_state()
+        demandFunc.save_state()
+        demandLabel.save_state()
+
+        self.play(
+            Uncreate(supplyFunc),
+            Unwrite(supplyLabel, run_time = 1, lag_ratio = 0.1),
+            Unwrite(eqPtLbl, run_time = 1, lag_ratio = 0.1),
+            Transform(yLab1, yLab2),
+            Transform(xLab1, xLab2),
+        )
+        supplyFunc.restore()
+        supplyLabel.restore()
+
+        self.wait()
+
+        lineFake = axes.plot(
+            lambda x: 0.1746,
+            x_range = [0, 1],
+        )
+
+        consSur = Tex("Consumer Surplus", color = RED)
+        consSur.move_to(LEFT * 1.8)
+        consExp = Tex("Consumer Expenditure", color = GREEN)
+        consExp.move_to(DOWN * 2.5 + RIGHT * 2)
+
+        area = axes.get_area(demandFunc, [0, 0.4178], bounded_graph = lineFake, color = RED, opacity = 0.5)
+
+        self.play(
+            DrawBorderThenFill(polygon),
+            DrawBorderThenFill(area),
+            Write(consSur),
+            Write(consExp),
+        )
+
+        self.wait()
+        self.play(
+            Unwrite(consSur, run_time = 1, lag_ratio = 0.1),
+            Unwrite(consExp, run_time = 1, lag_ratio = 0.1),
+            Uncreate(polygon),
+            FadeOut(area),
+            Unwrite(demandLabel, run_time = 1, lag_ratio = 0.1),
+            Transform(demandFunc, supplyFunc),
+            Write(supplyLabel),
+        )
+        demandLabel.restore()
+
+        lineFake2 = axes.plot(
+            lambda x: 0.1746,
+        )
+        area2 = axes.get_area(supplyFunc, [0, 0.4178], bounded_graph = lineFake2, color = RED, opacity = 0.5)
+        area3 = axes.get_area(supplyFunc, x_range = [0, 0.4178], color = GREEN, opacity = 0.5)
+
+        proSur = Tex("Producer Surplus", color = RED)
+        proSur.move_to(LEFT * 3.5 + DOWN * 1.5)
+        neededRev = Tex("Needed Producer Revenue", color = GREEN)
+        neededRev.move_to(DOWN * 2.5 + RIGHT * 2)
+
+        self.play(
+            Write(proSur),
+            Write(neededRev),
+            DrawBorderThenFill(area2),
+            DrawBorderThenFill(area3),
+        )
+
+        self.wait()
+
+        demandFunc2 = axes.plot(
+            lambda x: 1 / (x + 1)**5,
+            x_range = [0, 1],
+            color = BLUE,
+        )
+        proSur.set_z_index(100)
+        self.play(
+            Create(demandFunc2),
+            Write(demandLabel, run_time = 1, lag_ratio = 0.1),
+            Unwrite(neededRev, run_time = 1, lag_ratio = 0.1),
+            FadeOut(area3),
+            proSur.animate.move_to(DOWN * 2.5 + RIGHT * 0.7),
         )
 
         self.wait()
