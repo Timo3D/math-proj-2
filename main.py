@@ -324,23 +324,23 @@ class consumerProducerSurplus(Scene):
 
         polygon = always_redraw(get_rectangle)
 
-        dot = Dot()
+        vTrack = 0.4178
+        dot = Dot(axes.i2gp(vTrack, supplyFunc))
         dot.set_z_index(1001)
-        dot.add_updater(lambda x: x.move_to(axes.c2p(0.4178, 0.1746)))
 
         eqPtLbl = Tex("Equilibrium Point")
         eqPtLbl.move_to(RIGHT + DOWN * 1.3)
 
-        lines = axes.get_lines_to_point(axes.c2p(0.4178, 0.1746), color = YELLOW)
+        lines = axes.get_lines_to_point(axes.i2gp(vTrack, supplyFunc), color = YELLOW)
         
         yLab1 = MathTex("p_e")
         yLab1.next_to(axes.c2p(0, 0.1746), LEFT)
         xLab1 = MathTex("q_e")
-        xLab1.next_to(axes.c2p(0.4178, 0), DOWN)
+        xLab1.next_to(axes.c2p(vTrack, 0), DOWN)
         yLab2 = MathTex("p_s")
         yLab2.next_to(axes.c2p(0, 0.1746), LEFT)
         xLab2 = MathTex("q_s")
-        xLab2.next_to(axes.c2p(0.4178, 0), DOWN)
+        xLab2.next_to(axes.c2p(vTrack, 0), DOWN)
 
         self.play(
             Create(dot, run_time = 1, lag_ratio = 0.1),
@@ -538,6 +538,12 @@ class consumerProducerSurplus(Scene):
             proSur.animate.move_to(DOWN * 2.5 + RIGHT * 0.7),
             DrawBorderThenFill(area),
             Write(consSur2, run_time = 1, lag_ratio = 0.1)
+        )
+
+        self.wait()
+
+        self.play(
+            MoveAlongPath(dot, supplyFunc, run_time = 2),
         )
 
         self.wait()
