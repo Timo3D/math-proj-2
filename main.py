@@ -1,8 +1,3 @@
-from ctypes import alignment
-from shutil import move
-from tkinter import CENTER
-from venv import create
-from click import style
 from manim import *
 
 class RiemannSums(Scene):
