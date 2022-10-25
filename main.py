@@ -403,17 +403,6 @@ class consumerProducerSurplus(Scene):
         area = axes.get_area(demandFunc, [0, 0.4178], bounded_graph = lineFake, color = RED, opacity = 0.5)
         area.save_state()
 
-        self.play(
-            Unwrite(formula, run_time = 1, lag_ratio = 0.1, reverse = False),
-            Unwrite(will2Spend, run_time = 1, lag_ratio = 0.1, reverse = False),
-            FadeOut(area0, run_time = 2, lag_ratio = 0.1),
-            DrawBorderThenFill(polygon),
-            DrawBorderThenFill(area),
-            Write(consSur),
-            Write(consExp),
-        )
-        self.wait()
-
         integral2, v_t2, dt2 = formula2 = MathTex(
             "\\int_0^{q_s}", "{p_s}", "\\,dq",
             color = GREEN,
@@ -429,6 +418,18 @@ class consumerProducerSurplus(Scene):
         formula3.set_color_by_tex("demand\\,function (q) - {p_s}", BLUE)
 
         self.play(
+            formula.animate.shift(UP + LEFT * 1.53),
+            Unwrite(integral, reverse = False),
+            Unwrite(dt, reverse = False),
+            Unwrite(will2Spend, run_time = 1, lag_ratio = 0.1, reverse = False),
+        )
+
+        self.play(
+            FadeOut(area0, run_time = 2, lag_ratio = 0.1),
+            DrawBorderThenFill(polygon),
+            DrawBorderThenFill(area),
+            Write(consSur),
+            Write(consExp),
             Write(formula2),
             Write(eq2),
             Write(formula3),
@@ -436,38 +437,79 @@ class consumerProducerSurplus(Scene):
         )
 
         self.wait()
-
         self.play(
+            Unwrite(formula, run_time = 1, lag_ratio = 0.1),
             Unwrite(formula2, run_time = 1, lag_ratio = 0.1),
             Unwrite(eq2, run_time = 1, lag_ratio = 0.1),
             Unwrite(formula3, run_time = 1, lag_ratio = 0.1),
             Unwrite(eq3, run_time = 1, lag_ratio = 0.1),
             Unwrite(consSur, run_time = 1, lag_ratio = 0.1),
             Unwrite(consExp, run_time = 1, lag_ratio = 0.1),
-            Uncreate(polygon),
+            # Uncreate(polygon),
             FadeOut(area),
             Unwrite(demandLabel, run_time = 1, lag_ratio = 0.1),
             Transform(demandFunc, supplyFunc),
             Write(supplyLabel),
         )
         demandLabel.restore()
-
         lineFake2 = axes.plot(
             lambda x: 0.1746,
         )
-        area2 = axes.get_area(supplyFunc, [0, 0.4178], bounded_graph = lineFake2, color = RED, opacity = 0.5)
+        area2 = axes.get_area(supplyFunc, [0, 0.4178], bounded_graph = lineFake2, color = LIGHT_PINK, opacity = 0.5)
         area3 = axes.get_area(supplyFunc, x_range = [0, 0.4178], color = GREEN, opacity = 0.5)
 
-        proSur = Tex("Producer Surplus", color = RED)
+        proSur = Tex("Producer Surplus", color = LIGHT_PINK)
         proSur.move_to(LEFT * 3.5 + DOWN * 1.5)
         neededRev = Tex("Needed Producer Revenue", color = GREEN)
         neededRev.move_to(DOWN * 2.5 + RIGHT * 2)
 
+        proRev = Tex("Producer Revenue", color = GREEN)
+        proRev.move_to(LEFT * 3.5 + DOWN * 1.5)
+
+        integral4, v_t4, dt4 = proRevEqn = MathTex(
+            "\\int_0^{q_s}", "{p_s}", "\\,dq",
+            color = GREEN,
+        ).move_to(UL)
+        proRevEqn.set_color_by_tex("{p_s}", RED)
+        eq4 = MathTex("=", color = GREEN).next_to(proRevEqn, DOWN)
+        gr4 = VGroup(proRevEqn, eq4).arrange(DOWN)
+        gr4.shift(LEFT * 3.5)
+
         self.play(
-            Write(proSur),
+            Write(proRev, run_time = 1, lag_ratio = 0.1),
+        )
+
+        self.play(
+            Write(gr4)
+        )
+
+        self.wait()
+
+        integral5, v_t5, dt5 = proSurEqn = MathTex(
+            "\\int_0^{q_s}", "{p_s} - supply\\,function (q)", "\\,dq",
+            color = LIGHT_PINK,
+        ).move_to(LEFT * 1.14 + UP * 0.173)
+        proSurEqn.set_color_by_tex("{p_s} - supply\\,function (q)", RED)
+
+        integral6, v_t6, dt6 = neededRevEqn = MathTex(
+            "\\int_0^{q_s}", "supply\\,function (q)", "\\,dq",
+            color = GREEN,
+        ).move_to(LEFT * 1.14 + UP * 0.173)
+        neededRevEqn.set_color_by_tex("supply\\,function (q)", RED)
+        eq6 = Tex("=").set_color(GREEN).next_to(neededRevEqn, DOWN)
+        gr6 = VGroup(neededRevEqn, eq6).arrange(DOWN).move_to(DR + RIGHT)
+
+        self.play(
+            FadeOut(integral4, run_time = 1, lag_ratio = 0.1),
+            Unwrite(dt4, run_time = 1, lag_ratio = 0.1),
+            eq4.animate.set_color(LIGHT_PINK),
+            Uncreate(polygon),
+            ReplacementTransform(proRev, proSur),
             Write(neededRev),
             DrawBorderThenFill(area2),
             DrawBorderThenFill(area3),
+            Write(proSurEqn),
+            Write(gr6),
         )
 
         self.wait()
@@ -484,10 +526,15 @@ class consumerProducerSurplus(Scene):
         area.restore()
         area.set_color(BLUE)
         self.play(
+            Unwrite(gr4, run_time = 1, lag_ratio = 0.1, reverse = False),
+            Unwrite(gr6, run_time = 1, lag_ratio = 0.1, reverse = False),
+            Unwrite(proSurEqn, run_time = 1, lag_ratio = 0.1, reverse = False),
+            Unwrite(neededRev, run_time = 1, lag_ratio = 0.1, reverse = False),
+            FadeOut(area3),
+        )
+        self.play(
             Create(demandFunc2),
             Write(demandLabel, run_time = 1, lag_ratio = 0.1),
-            Unwrite(neededRev, run_time = 1, lag_ratio = 0.1),
-            FadeOut(area3),
             proSur.animate.move_to(DOWN * 2.5 + RIGHT * 0.7),
             DrawBorderThenFill(area),
             Write(consSur2, run_time = 1, lag_ratio = 0.1)
