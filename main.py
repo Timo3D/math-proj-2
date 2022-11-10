@@ -542,8 +542,8 @@ class consumerProducerSurplus(Scene):
 
         self.wait()
 
-        self.play(
-            MoveAlongPath(dot, supplyFunc, run_time = 2),
-        )
+        # self.play(
+        #     MoveAlongPath(dot, supplyFunc, run_time = 2),
+        # )
 
-        self.wait()
+        # self.wait()
