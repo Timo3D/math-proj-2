@@ -257,7 +257,7 @@ class consumerProducerSurplus(Scene):
         ]
 
     def construct(self):
-        line1 = Tex("Consumer and Producer Surplus")
+        consumer0, andProducerSurplus = line1 = Tex("Consumer", " and Producer Surplus")
 
         self.play(Write(line1))
         self.wait()
@@ -324,23 +324,34 @@ class consumerProducerSurplus(Scene):
 
         polygon = always_redraw(get_rectangle)
 
-        vTrack = 0.4178
-        dot = Dot(axes.i2gp(vTrack, supplyFunc))
+        dotTrack = ValueTracker(0.4178)
+        dot = Dot(axes.i2gp(dotTrack.get_value(), supplyFunc))
         dot.set_z_index(1001)
+        f_always(
+            dot.move_to,
+            lambda: axes.i2gp(dotTrack.get_value(), supplyFunc)
+        )
 
         eqPtLbl = Tex("Equilibrium Point")
         eqPtLbl.move_to(RIGHT + DOWN * 1.3)
 
-        lines = axes.get_lines_to_point(axes.i2gp(vTrack, supplyFunc), color = YELLOW)
+        def get_lines():
+            return axes.get_lines_to_point(axes.i2gp(dotTrack.get_value(), supplyFunc), color = YELLOW)
         
-        yLab1 = MathTex("p_e")
-        yLab1.next_to(axes.c2p(0, 0.1746), LEFT)
-        xLab1 = MathTex("q_e")
-        xLab1.next_to(axes.c2p(vTrack, 0), DOWN)
+        lines = always_redraw(get_lines)
+
+        def get_xLab1():
+            return MathTex("q_e").next_to(axes.c2p(dotTrack.get_value(), 0), DOWN)
+
+        def get_yLab1():
+            return MathTex("p_e").next_to(axes.c2p(0, dotTrack.get_value() ** 2), LEFT)
+        
+        yLab1 = always_redraw(get_yLab1)
+        xLab1 = always_redraw(get_xLab1)
         yLab2 = MathTex("p_s")
         yLab2.next_to(axes.c2p(0, 0.1746), LEFT)
         xLab2 = MathTex("q_s")
-        xLab2.next_to(axes.c2p(vTrack, 0), DOWN)
+        xLab2.next_to(axes.c2p(dotTrack.get_value(), 0), DOWN)
 
         self.play(
             Create(dot, run_time = 1, lag_ratio = 0.1),
@@ -368,12 +379,16 @@ class consumerProducerSurplus(Scene):
 
         self.wait()
 
-        lineFake = axes.plot(
-            lambda x: 0.1746,
-            x_range = [0, 1],
-        )
+        def get_lineFake():
+            return axes.plot(lambda x: dotTrack.get_value()**2, x_range = [0, 1])
+            
+        lineFake = always_redraw(get_lineFake)
 
-        area0 = axes.get_area(demandFunc, [0, 0.4178], color = PURPLE, opacity = 0.5)
+        def get_area0():
+            return axes.get_area(demandFunc, [0, 0.4178], color = PURPLE, opacity = 0.5)
+
+        area0 = always_redraw(get_area0)
+
         will2Spend = Tex("= Willingness to spend", color = PURPLE)
         integral, v_t, dt = formula = MathTex(
             "\\int_0^{q_s}", "demand\\,function (q)", "\\,dq",
@@ -400,7 +415,11 @@ class consumerProducerSurplus(Scene):
         consExp = Tex("Consumer Expenditure", color = GREEN)
         consExp.move_to(DOWN * 2.5 + RIGHT * 2)
 
-        area = axes.get_area(demandFunc, [0, 0.4178], bounded_graph = lineFake, color = RED, opacity = 0.5)
+        def get_area():
+            return axes.get_area(demandFunc, [0, dotTrack.get_value()], bounded_graph = lineFake, color = RED, opacity = 0.5)
+
+        area = always_redraw(get_area)
+
         area.save_state()
 
         integral2, v_t2, dt2 = formula2 = MathTex(
@@ -452,12 +471,20 @@ class consumerProducerSurplus(Scene):
             Write(supplyLabel),
         )
         demandLabel.restore()
-        lineFake2 = axes.plot(
-            lambda x: 0.1746,
-        )
-        area2 = axes.get_area(supplyFunc, [0, 0.4178], bounded_graph = lineFake2, color = LIGHT_PINK, opacity = 0.5)
-        area3 = axes.get_area(supplyFunc, x_range = [0, 0.4178], color = GREEN, opacity = 0.5)
 
+        def get_lineFake2():
+            return axes.plot(lambda x: dotTrack.get_value()**2, x_range = [0, dotTrack.get_value() + 0.05])
+
+        def get_area2():
+            return axes.get_area(supplyFunc, [0, dotTrack.get_value()], bounded_graph = lineFake2, color = LIGHT_PINK, opacity = 0.5)
+
+        def get_area3():
+            return axes.get_area(supplyFunc, x_range = [0, dotTrack.get_value()], color = GREEN, opacity = 0.5)
+            
+        lineFake2 = always_redraw(get_lineFake2)
+        area2 = always_redraw(get_area2)
+        area3 = always_redraw(get_area3)
+        
         proSur = Tex("Producer Surplus", color = LIGHT_PINK)
         proSur.move_to(LEFT * 3.5 + DOWN * 1.5)
         neededRev = Tex("Needed Producer Revenue", color = GREEN)
@@ -532,18 +559,51 @@ class consumerProducerSurplus(Scene):
             Unwrite(neededRev, run_time = 1, lag_ratio = 0.1, reverse = False),
             FadeOut(area3),
         )
+
+        def get_area4():
+            return axes.get_area(demandFunc2, [0, dotTrack.get_value()], bounded_graph = lineFake2, color = BLUE, opacity = 0.5)
+
+        area4 = always_redraw(get_area4)
+
         self.play(
+            Create(lineFake2),
             Create(demandFunc2),
             Write(demandLabel, run_time = 1, lag_ratio = 0.1),
             proSur.animate.move_to(DOWN * 2.5 + RIGHT * 0.7),
-            DrawBorderThenFill(area),
-            Write(consSur2, run_time = 1, lag_ratio = 0.1)
+            DrawBorderThenFill(area4),
+            Write(consSur2, run_time = 1, lag_ratio = 0.1),
+        )
+
+        self.wait()
+        consumer, cartel = lineCartel = Tex("Consumer", " Cartel").move_to(UP*3)
+        self.play(
+            TransformMatchingTex(line1, lineCartel),
+            proSur.animate.shift(LEFT + DOWN * 0.3),
+            dotTrack.animate.set_value(0.3),
         )
 
         self.wait()
 
-        # self.play(
-        #     MoveAlongPath(dot, supplyFunc, run_time = 2),
-        # )
-
-        # self.wait()
+        self.play(
+            AnimationGroup(
+                Unwrite(lineCartel),
+                Unwrite(labels),
+                Unwrite(supplyLabel),
+                Unwrite(demandLabel),
+                Unwrite(proSur, run_time = 1, lag_ratio = 0.1),
+                Unwrite(consSur2, run_time = 1, lag_ratio = 0.1),
+                Uncreate(lineFake2, reversed = False),
+                Uncreate(area4),
+                Uncreate(area2),
+                Uncreate(lines),
+                Uncreate(dot),
+                Uncreate(demandFunc2),
+                Uncreate(demandFunc),
+                Unwrite(xLab1),
+                Unwrite(yLab1),
+                Uncreate(axes),
+                lag_ratio = 0.2
+            )
+        )
+        
+        self.wait()
