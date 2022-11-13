@@ -164,7 +164,7 @@ class integrationIntro(Scene):
         line1 = Tex("Integration")
         line1.move_to(UP * 2)
 
-        eng, bus, fin, d1, d2, d3 = Tex("Engineering", "Finances", "Business", ".", ".", ".")
+        eng, bus, fin, d1, d2, d3 = Tex("Engineering", "Business", "Finances", ".", ".", ".")
         gr1 = VGroup(eng, bus, fin, d1, d2, d3).arrange(DOWN, aligned_edge = LEFT)
 
         deriv, integral, v_t, dt, equals, v_T = formula = MathTex(
@@ -205,18 +205,17 @@ class integrationIntro(Scene):
         self.wait()
         self.play(
             FadeOut(eng),
-            FadeOut(bus),
+            FadeOut(fin),
             FadeOut(d1),
             FadeOut(d2),
             FadeOut(d3),
-            fin.animate.set_color_by_tex(YELLOW),
-            fin.animate.next_to(line1, LEFT).shift(UP*0.05 + RIGHT * 1.05),
+            bus.animate.set_color_by_tex(YELLOW),
+            bus.animate.next_to(line1, LEFT).shift(UP*0.05 + RIGHT * 1.05),
             line1.animate.shift(RIGHT),
             formula.animate.shift(UP * 2.5),
         )
         self.wait()
         self.play(
-            fin.animate.set_color(WHITE),
             # Unwrite(fin),
             # Unwrite(line1),
             Unwrite(formula),
@@ -229,6 +228,41 @@ class integration2(Scene):
         line1.move_to(UP * 2)
         self.add(line1)
         self.wait()
+        deter, rev, cost, profit, cusSur, d1, d2, d3 = line2 = Tex("Often used to determine: ", "Total revenue", "Costs", "Profits", "Cus/Pro surplus", ".", ".", ".")
+        gr1 = VGroup(deter, rev, cost, profit, cusSur, d1, d2, d3).arrange(DOWN, center = True, aligned_edge = ORIGIN).shift(DOWN)
+        self.play(
+            line1.animate.set_color(YELLOW),
+            Write(deter),
+        )
+        self.wait()
+        self.play(
+            AnimationGroup(
+                Write(rev),
+                Write(cost),
+                Write(profit),
+                lag_ratio = 1
+            )
+        )
+        self.wait()
+        self.play(
+            AnimationGroup(
+                Write(cusSur),
+                lag_ratio = 1
+            )
+        )
+        self.play(
+            AnimationGroup(
+                Write(d1),
+                Write(d2),
+                Write(d3),
+                lag_ratio = 0.2
+            )
+        )
+        self.wait()
+        self.play(
+            FadeOut(line1),
+            FadeOut(line2),
+        )
 
 class lorenzCurve(Scene):
     def construct(self):
@@ -281,7 +315,69 @@ class lorenzCurve(Scene):
 
         self.wait()
 
-class consumerProducerSurplus(Scene):
+        self.play(labels[1].animate.set_color(RED), run_time = 0.3)
+        self.wait(0.5)
+        self.play(labels[1].animate.set_color(WHITE), run_time = 0.3)
+        self.wait(0.5)
+        self.play(labels[0].animate.set_color(RED), run_time = 0.3)
+        self.wait(0.5)
+        self.play(labels[0].animate.set_color(WHITE), run_time = 0.3)
+        self.wait()
+
+        dotTrack = ValueTracker(0)
+        dot = Dot(axes.i2gp(dotTrack.get_value(), lorenzCurve))
+        dot.set_z_index(1001)
+        f_always(
+            dot.move_to,
+            lambda: axes.i2gp(dotTrack.get_value(), lorenzCurve)
+        )
+
+        def get_lines():
+            return axes.get_lines_to_point(axes.i2gp(dotTrack.get_value(), lorenzCurve), color = BLUE)
+        
+        lines = always_redraw(get_lines)
+
+        self.play(
+            Create(dot),
+            Create(lines),
+        )
+
+        self.play(
+            dotTrack.animate.set_value(0.2),
+        )
+
+        self.wait(0.5)
+        self.play(
+            dotTrack.animate.set_value(0.44),
+        )
+
+        self.wait(0.5)
+        self.play(
+            dotTrack.animate.set_value(0.76),
+        )
+
+        self.wait(0.5)
+        self.play(
+            dotTrack.animate.set_value(0.92),
+        )
+
+        self.wait()
+        self.play(
+            AnimationGroup(
+                Unwrite(line1),
+                Unwrite(line2),
+                Uncreate(lorenzCurve),
+                Uncreate(labels),
+                Uncreate(dot),
+                Uncreate(line),
+                Uncreate(lines),
+                Uncreate(axes),
+                lag_ratio = 0.2
+            )
+        )
+        self.wait()
+
+class consumerProducerSurplus(MovingCameraScene):
     def get_rectangle_corners(self, bottom_left, top_right):
         return [
             (top_right[0], top_right[1]),
@@ -323,7 +419,6 @@ class consumerProducerSurplus(Scene):
             x_label = Tex("Quantity"),
             y_label = Tex("Price"),
         )
-
 
         self.play(
             Create(axes, run_time = 2, lag_ratio = 0.1),
@@ -400,6 +495,91 @@ class consumerProducerSurplus(Scene):
         supplyLabel.save_state()
         demandFunc.save_state()
         demandLabel.save_state()
+        self.camera.frame.save_state()
+
+        lineOtherWays = Tex("Application of integration within a business:", color = YELLOW).move_to(UP * 5 + RIGHT * 13)
+        e1 = Tex("Aids in mergers and acquisitions")
+        e2 = Tex("Enforces compliance")
+        e3 = Tex("Reduces errors")
+        e4 = Tex("Automation")
+        e5 = Tex("Enhances outlook of data")
+        e6 = Tex(".")
+        e7 = Tex(".")
+        e8 = Tex(".")
+        e12 = Tex("Advantages:", color = GREEN)
+        e9 = Tex("Maximises profits")
+        e10 = Tex("Find value of income stream")
+        e11 = Tex("Determine demand")
+        e13 = Tex(".")
+        e14 = Tex(".")
+        e15 = Tex(".")
+
+        grOtherWays = VGroup(e1, e2, e3, e4, e5, e6, e7, e8).arrange(DOWN, aligned_edge = LEFT).move_to(RIGHT * 13 + UP * 2)
+        grOtherWays2 = VGroup(e12, e9, e10, e11, e13, e14, e15).arrange(DOWN, aligned_edge = LEFT).move_to(RIGHT * 12.5 + DOWN * 3)
+        self.add(
+            lineOtherWays,
+            grOtherWays,
+        )
+
+        self.play(self.camera.frame.animate.scale(2).move_to(RIGHT * 6))
+
+        self.wait()
+
+        self.play(e1.animate.set_color(YELLOW), run_time = 0.4,)
+        self.wait(0.5)
+        self.play(
+            e1.animate.set_color(WHITE),
+            e2.animate.set_color(YELLOW),
+            run_time = 0.4,
+        )
+        self.wait(0.5)
+        self.play(
+            e2.animate.set_color(WHITE),
+            e3.animate.set_color(YELLOW),
+            run_time = 0.4,
+        )
+        self.wait(0.5)
+        self.play(
+            e3.animate.set_color(WHITE),
+            e4.animate.set_color(YELLOW),
+            run_time = 0.4,
+        )
+        self.wait(0.5)
+        self.play(
+            e4.animate.set_color(WHITE),
+            e5.animate.set_color(YELLOW),
+            run_time = 0.4,
+        )
+        self.wait(0.5)
+        self.play(e5.animate.set_color(WHITE), run_time = 0.4,)
+
+        self.wait()
+
+        self.play(Write(grOtherWays2))
+
+        self.wait(0.5)
+
+        self.play(e9.animate.set_color(GREEN), run_time = 0.4,)
+        self.wait(0.5)
+        self.play(
+            e9.animate.set_color(WHITE),
+            e10.animate.set_color(GREEN),
+            run_time = 0.4,
+        )
+        self.wait(0.5)
+        self.play(
+            e10.animate.set_color(WHITE),
+            e11.animate.set_color(GREEN),
+            run_time = 0.4,
+        )
+        self.wait(0.5)
+        self.play(e11.animate.set_color(WHITE), run_time = 0.4,)
+
+        self.wait()
+
+        self.play(Restore(self.camera.frame))
+
+        self.wait()
 
         self.play(
             Uncreate(supplyFunc),
