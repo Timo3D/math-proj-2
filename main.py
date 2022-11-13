@@ -164,8 +164,8 @@ class integrationIntro(Scene):
         line1 = Tex("Integration")
         line1.move_to(UP * 2)
 
-        eng, bus, fin = Tex("Engineering", "Business", "Finances")
-        gr1 = VGroup(eng, bus, fin).arrange(DOWN, aligned_edge = LEFT)
+        eng, bus, fin, d1, d2, d3 = Tex("Engineering", "Finances", "Business", ".", ".", ".")
+        gr1 = VGroup(eng, bus, fin, d1, d2, d3).arrange(DOWN, aligned_edge = LEFT)
 
         deriv, integral, v_t, dt, equals, v_T = formula = MathTex(
             "\\frac{d}{dT}", 
@@ -174,26 +174,60 @@ class integrationIntro(Scene):
         )
         formula.set_color_by_tex("v", YELLOW)
 
-        self.play(Write(line1))
-        self.wait()
-        self.play(Write(gr1))
-        self.wait()
         self.play(
-            FadeOut(eng),
-            FadeOut(bus),
-            fin.animate.set_color_by_tex(YELLOW),
-            fin.animate.next_to(line1, LEFT),
+            Write(line1),
+            Write(VGroup(integral, v_t, dt))
         )
-        self.wait()
-        self.play(Write(VGroup(integral, v_t, dt)))
         self.wait()
         self.play(Write(VGroup(deriv, equals, v_T)))
         self.wait()
         self.play(
-            FadeOut(fin),
-            FadeOut(line1),
-            FadeOut(formula),
+            Write(gr1),
+            formula.animate.shift(DOWN*2.5),
         )
+        self.wait()
+        self.play(
+            eng.animate.set_color(YELLOW),
+            run_time = 0.4,
+        )
+        self.wait()
+        self.play(
+            eng.animate.set_color(WHITE),
+            bus.animate.set_color(YELLOW),
+            run_time = 0.4,
+        )
+        self.wait()
+        self.play(
+            bus.animate.set_color(WHITE),
+            fin.animate.set_color(YELLOW),
+            run_time = 0.4,
+        )
+        self.wait()
+        self.play(
+            FadeOut(eng),
+            FadeOut(bus),
+            FadeOut(d1),
+            FadeOut(d2),
+            FadeOut(d3),
+            fin.animate.set_color_by_tex(YELLOW),
+            fin.animate.next_to(line1, LEFT).shift(UP*0.05 + RIGHT * 1.05),
+            line1.animate.shift(RIGHT),
+            formula.animate.shift(UP * 2.5),
+        )
+        self.wait()
+        self.play(
+            fin.animate.set_color(WHITE),
+            # Unwrite(fin),
+            # Unwrite(line1),
+            Unwrite(formula),
+        )
+        self.wait()
+
+class integration2(Scene):
+    def construct(self):
+        line1 = Tex("Business Integration")
+        line1.move_to(UP * 2)
+        self.add(line1)
         self.wait()
 
 class lorenzCurve(Scene):
