@@ -435,14 +435,14 @@ class consumerProducerSurplus(MovingCameraScene):
 
         # self.wait()
 
-        t = ValueTracker(0)
+        dotTrack = ValueTracker(0.4178)
 
         def get_rectangle():
             polygon = Polygon(
                 *[
                     axes.c2p(*i)
                     for i in self.get_rectangle_corners(
-                        (0, 0), (0.4178, 0.1746)
+                        (0, 0), (dotTrack.get_value(), 1 / (dotTrack.get_value() + 1)**5)
                     )
                 ]
             )
@@ -453,21 +453,19 @@ class consumerProducerSurplus(MovingCameraScene):
 
         polygon = always_redraw(get_rectangle)
 
-        dotTrack = ValueTracker(0.4178)
         dot = Dot(axes.i2gp(dotTrack.get_value(), supplyFunc))
         dot.set_z_index(1001)
         f_always(
             dot.move_to,
-            lambda: axes.i2gp(dotTrack.get_value(), supplyFunc)
+            lambda: axes.i2gp(dotTrack.get_value(), demandFunc)
         )
 
         eqPtLbl = Tex("Equilibrium Point")
         eqPtLbl.move_to(RIGHT + DOWN * 1.3)
 
-        def get_lines():
-            return axes.get_lines_to_point(axes.i2gp(dotTrack.get_value(), supplyFunc), color = YELLOW)
-        
-        lines = always_redraw(get_lines)
+        def get_lines2():
+            return axes.get_lines_to_point(axes.i2gp(dotTrack.get_value(), demandFunc), color = YELLOW)
+        lines2 = always_redraw(get_lines2)
 
         def get_xLab1():
             return MathTex("q_e").next_to(axes.c2p(dotTrack.get_value(), 0), DOWN)
@@ -485,7 +483,7 @@ class consumerProducerSurplus(MovingCameraScene):
         self.play(
             Create(dot, run_time = 1, lag_ratio = 0.1),
             Write(eqPtLbl, run_time = 1, lag_ratio = 0.1),
-            Create(lines, lag_ratio = 0.1),
+            Create(lines2, lag_ratio = 0.1),
             Write(yLab1),
             Write(xLab1),
         )
@@ -579,24 +577,61 @@ class consumerProducerSurplus(MovingCameraScene):
 
         self.play(Restore(self.camera.frame))
 
+        self.remove(
+            lineOtherWays,
+            grOtherWays,
+            grOtherWays2,
+        )
+
+        self.wait()
+
+        framebox1 = SurroundingRectangle(dot, buff = .1)
+        self.play(Create(framebox1))
+        self.wait(0.5)
+        self.play(FadeOut(framebox1))
+
+        self.wait()
+
+        demandFuncHL = axes.plot(
+            lambda x: 1 / (x + 1)**5,
+            x_range = [0, dotTrack.get_value()],
+            color = YELLOW,
+        )
+        demandFuncHL.set_z_index(500)
+
+        supplyFuncHL = axes.plot(
+            lambda x: x**2,
+            x_range = [0, dotTrack.get_value()],
+            color = YELLOW,
+        )
+        demandFuncHL.set_z_index(500)
+
+        self.play(Create(supplyFuncHL))
+        self.wait(0.5)
+        self.play(FadeOut(supplyFuncHL))
+        self.wait(0.5)
+        self.play(Create(demandFuncHL))
+        self.wait(0.5)
+        self.play(FadeOut(demandFuncHL))
+
         self.wait()
 
         self.play(
             Uncreate(supplyFunc),
             Unwrite(supplyLabel, run_time = 1, lag_ratio = 0.1),
             Unwrite(eqPtLbl, run_time = 1, lag_ratio = 0.1),
-            Transform(yLab1, yLab2),
-            Transform(xLab1, xLab2),
+            ReplacementTransform(yLab1, yLab2),
+            ReplacementTransform(xLab1, xLab2),
         )
         supplyFunc.restore()
         supplyLabel.restore()
 
         self.wait()
 
-        def get_lineFake():
-            return axes.plot(lambda x: dotTrack.get_value()**2, x_range = [0, 1])
-            
-        lineFake = always_redraw(get_lineFake)
+        def get_lineFakeDF():
+            return axes.plot(lambda x: 1 / (dotTrack.get_value() + 1)**5, x_range = [0, 1], color = BLACK)
+        lineFakeDF = always_redraw(get_lineFakeDF)
+        lineFakeDF.set_z_index(-5)
 
         def get_area0():
             return axes.get_area(demandFunc, [0, 0.4178], color = PURPLE, opacity = 0.5)
@@ -630,10 +665,8 @@ class consumerProducerSurplus(MovingCameraScene):
         consExp.move_to(DOWN * 2.5 + RIGHT * 2)
 
         def get_area():
-            return axes.get_area(demandFunc, [0, dotTrack.get_value()], bounded_graph = lineFake, color = RED, opacity = 0.5)
-
+            return axes.get_area(demandFunc, [0, dotTrack.get_value()], bounded_graph = lineFakeDF, color = RED, opacity = 0.5)
         area = always_redraw(get_area)
-
         area.save_state()
 
         integral2, v_t2, dt2 = formula2 = MathTex(
@@ -658,7 +691,7 @@ class consumerProducerSurplus(MovingCameraScene):
         )
 
         self.play(
-            FadeOut(area0, run_time = 2, lag_ratio = 0.1),
+            FadeOut(area0),
             DrawBorderThenFill(polygon),
             DrawBorderThenFill(area),
             Write(consSur),
@@ -669,7 +702,87 @@ class consumerProducerSurplus(MovingCameraScene):
             Write(eq3),
         )
 
+        fakeArea = get_area()
+        fakeArea.set_fill(YELLOW, opacity = 1)
+        fakePoly = get_rectangle()
+        fakePoly.set_fill(YELLOW, opacity = 1)
+
         self.wait()
+        self.play(FadeIn(fakePoly), run_time = 0.5)
+        self.wait(0.5)
+        self.play(consExp.animate.set_color(YELLOW), run_time = 0.5)
+        self.wait(0.5)
+        self.play(
+            FadeOut(fakePoly),
+            consExp.animate.set_color(GREEN),
+            run_time = 0.5
+        )
+        self.wait(0.5)
+        self.play(FadeIn(fakeArea), run_time = 0.5)
+        area.set_fill(YELLOW)
+        self.wait(0.5)
+        self.play(consSur.animate.set_color(YELLOW), run_time = 0.5)
+        self.wait(0.5)
+        self.play(
+            FadeOut(fakeArea),
+            consSur.animate.set_color(RED),
+            run_time = 0.5
+        )
+        self.wait()
+
+        demandFuncFull = axes.plot(
+            lambda x: 1 / (x + 1)**5,
+            x_range = [0, 1],
+            color = YELLOW,
+        )
+        demandFuncFull.set_z_index(500)
+
+        demandFuncFull2 = axes.plot(
+            lambda x: 1 / (x + 1)**5,
+            x_range = [0, 1],
+            color = YELLOW,
+        )
+        demandFuncFull2.set_z_index(500)
+
+        supplyFuncFull = axes.plot(
+            lambda x: x**2,
+            x_range = [0, 1],
+            color = YELLOW,
+        )
+        supplyFuncFull.set_z_index(500)
+
+        self.add(lineFakeDF)
+
+        self.play(Create(demandFuncFull))
+        self.wait(0.5)
+        self.play(dotTrack.animate.set_value(0.5))
+        self.wait(0.5)
+        self.play(dotTrack.animate.set_value(0.7))
+        self.wait(0.5)
+        self.play(dotTrack.animate.set_value(0.9))
+        self.wait(0.5)
+        self.play(
+            dotTrack.animate.set_value(0.4178),
+            Uncreate(demandFuncFull),
+        )
+        self.wait()
+
+        def get_lineFake():
+            return axes.plot(lambda x: dotTrack.get_value()**2, x_range = [0, 1], color = BLACK)
+        lineFake = always_redraw(get_lineFake)
+
+        self.remove(lineFakeDF)
+        area.bounded_graph = lineFake
+
+        f_always(
+            dot.move_to,
+            lambda: axes.i2gp(dotTrack.get_value(), supplyFunc)
+        )
+        def get_lines():
+            return axes.get_lines_to_point(axes.i2gp(dotTrack.get_value(), supplyFunc), color = YELLOW)
+        lines = always_redraw(get_lines)
+        self.add(lines)
+        self.remove(lines2)
         self.play(
             Unwrite(formula, run_time = 1, lag_ratio = 0.1),
             Unwrite(formula2, run_time = 1, lag_ratio = 0.1),
@@ -687,7 +800,7 @@ class consumerProducerSurplus(MovingCameraScene):
         demandLabel.restore()
 
         def get_lineFake2():
-            return axes.plot(lambda x: dotTrack.get_value()**2, x_range = [0, dotTrack.get_value() + 0.05])
+            return axes.plot(lambda x: dotTrack.get_value()**2, x_range = [0, 1], color = BLACK)
 
         def get_area2():
             return axes.get_area(supplyFunc, [0, dotTrack.get_value()], bounded_graph = lineFake2, color = LIGHT_PINK, opacity = 0.5)
@@ -696,6 +809,7 @@ class consumerProducerSurplus(MovingCameraScene):
             return axes.get_area(supplyFunc, x_range = [0, dotTrack.get_value()], color = GREEN, opacity = 0.5)
             
         lineFake2 = always_redraw(get_lineFake2)
+        lineFake2.set_z_index(-5)
         area2 = always_redraw(get_area2)
         area3 = always_redraw(get_area3)
         
@@ -716,13 +830,9 @@ class consumerProducerSurplus(MovingCameraScene):
         gr4 = VGroup(proRevEqn, eq4).arrange(DOWN)
         gr4.shift(LEFT * 3.5)
 
-        self.play(
-            Write(proRev, run_time = 1, lag_ratio = 0.1),
-        )
+        self.play(Write(proRev, run_time = 1, lag_ratio = 0.1),)
 
-        self.play(
-            Write(gr4)
-        )
+        self.play(Write(gr4))
 
         self.wait()
 
@@ -755,6 +865,31 @@ class consumerProducerSurplus(MovingCameraScene):
 
         self.wait()
 
+        fakeArea3 = get_area3()
+        fakeArea3.set_fill(YELLOW, opacity = 1)
+        fakeArea2 = get_area2()
+        fakeArea2.set_fill(YELLOW, opacity = 1)
+
+        self.play(FadeIn(fakeArea3), run_time = 0.5)
+        self.wait(0.5)
+        self.play(neededRev.animate.set_color(YELLOW), run_time = 0.5)
+        self.wait(0.5)
+        self.play(
+            neededRev.animate.set_color(GREEN),
+            FadeOut(fakeArea3),
+            run_time = 0.5
+        )
+        self.play(FadeIn(fakeArea2), run_time = 0.5)
+        self.wait(0.5)
+        self.play(proSur.animate.set_color(YELLOW), run_time = 0.5)
+        self.wait(0.5)
+        self.play(
+            proSur.animate.set_color(LIGHT_PINK),
+            FadeOut(fakeArea2),
+            run_time = 0.5
+        )
+        self.wait()
+
         demandFunc2 = axes.plot(
             lambda x: 1 / (x + 1)**5,
             x_range = [0, 1],
@@ -774,13 +909,24 @@ class consumerProducerSurplus(MovingCameraScene):
             FadeOut(area3),
         )
 
+        self.wait()
+
+        self.add(lineFake2)
+
+        self.play(dotTrack.animate.set_value(0.5))
+        self.play(dotTrack.animate.set_value(0.68))
+        self.play(dotTrack.animate.set_value(0.88))
+        self.wait(0.5)
+        self.play(dotTrack.animate.set_value(0.4178), run_time = 0.3)
+
+        self.wait()
+
         def get_area4():
             return axes.get_area(demandFunc2, [0, dotTrack.get_value()], bounded_graph = lineFake2, color = BLUE, opacity = 0.5)
 
         area4 = always_redraw(get_area4)
 
         self.play(
-            Create(lineFake2),
             Create(demandFunc2),
             Write(demandLabel, run_time = 1, lag_ratio = 0.1),
             proSur.animate.move_to(DOWN * 2.5 + RIGHT * 0.7),
@@ -789,6 +935,93 @@ class consumerProducerSurplus(MovingCameraScene):
         )
 
         self.wait()
+
+        self.play(self.camera.frame.animate.scale(1.5).move_to(RIGHT * 3))
+
+        self.wait()
+
+        area4C = get_area4().set_color(YELLOW).set_opacity(1)
+        area2C = get_area2().set_color(YELLOW).set_opacity(1)
+        totalSG = Tex("Total Social Gain", color = YELLOW).shift(UP + LEFT * 2.5)
+        self.play(
+            FadeIn(area4C),
+            FadeIn(area2C),
+            FadeIn(totalSG),
+            run_time = 0.5
+        )
+        self.play(
+            area4C.animate.shift(RIGHT * 14),
+            area2C.animate.shift(RIGHT * 14),
+            totalSG.animate.shift(RIGHT * 14)
+        )
+
+        self.wait()
+
+        self.play(Restore(self.camera.frame))
+
+        self.wait()
+
+        area4C.set_opacity(0)
+        area4C.shift(LEFT * 14)
+        area2C.set_opacity(0)
+        area2C.shift(LEFT * 14)
+
+        self.play(
+            area4C.animate.set_opacity(1),
+            consSur2.animate.set_color(YELLOW),
+            run_time = 0.5
+        )
+        self.wait(0.5)
+        self.play(
+            FadeOut(area4C),
+            consSur2.animate.set_color(BLUE),
+            run_time = 0.5
+        )
+        self.wait(0.5)
+        self.play(Create(framebox1))
+        self.wait(0.5)
+        self.play(FadeOut(framebox1))
+        self.wait()
+
+        self.play(
+            area2C.animate.set_opacity(1),
+            proSur.animate.set_color(YELLOW),
+            run_time = 0.5
+        )
+        self.wait(0.5)
+        self.play(
+            FadeOut(area2C),
+            proSur.animate.set_color(PURPLE),
+            run_time = 0.5
+        )
+        self.wait(0.5)
+        self.play(Create(framebox1))
+        self.wait(0.5)
+        self.play(FadeOut(framebox1))
+
+        self.wait()
+
+        self.play(
+            Create(framebox1),
+            Create(supplyFuncFull),
+            Create(demandFuncFull2),
+        )
+        self.wait(0.5)
+        self.play(FadeOut(framebox1))
+        self.wait()
+
+        socialGainText = Tex("Maximises Social Gain", color = GREEN).next_to(dot, RIGHT)
+
+        self.play(
+            Write(socialGainText)
+        )
+        self.wait()
+        self.play(
+            FadeOut(socialGainText),
+            Uncreate(supplyFuncFull),
+            Uncreate(demandFuncFull2),
+        )
+
         consumer, cartel = lineCartel = Tex("Consumer", " Cartel").move_to(UP*3)
         self.play(
             TransformMatchingTex(line1, lineCartel),
@@ -813,8 +1046,8 @@ class consumerProducerSurplus(MovingCameraScene):
                 Uncreate(dot),
                 Uncreate(demandFunc2),
                 Uncreate(demandFunc),
-                Unwrite(xLab1),
-                Unwrite(yLab1),
+                Unwrite(xLab2),
+                Unwrite(yLab2),
                 Uncreate(axes),
                 lag_ratio = 0.2
             )
