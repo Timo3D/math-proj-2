@@ -472,13 +472,21 @@ class consumerProducerSurplus(MovingCameraScene):
 
         def get_yLab1():
             return MathTex("p_e").next_to(axes.c2p(0, dotTrack.get_value() ** 2), LEFT)
+
+        def get_xLab2():
+            return MathTex("q_s").next_to(axes.c2p(dotTrack.get_value(), 0), DOWN)
+
+        def get_yLab3():
+            return MathTex("p_s").next_to(axes.c2p(0, 1 / (dotTrack.get_value() + 1)**5), LEFT)
+
+        def get_yLab2():
+            return MathTex("p_s").next_to(axes.c2p(0, dotTrack.get_value() ** 2), LEFT)
         
         yLab1 = always_redraw(get_yLab1)
         xLab1 = always_redraw(get_xLab1)
-        yLab2 = MathTex("p_s")
-        yLab2.next_to(axes.c2p(0, 0.1746), LEFT)
-        xLab2 = MathTex("q_s")
-        xLab2.next_to(axes.c2p(dotTrack.get_value(), 0), DOWN)
+        yLab2 = always_redraw(get_yLab2)
+        yLab3 = always_redraw(get_yLab3)
+        xLab2 = always_redraw(get_xLab2)
 
         self.play(
             Create(dot, run_time = 1, lag_ratio = 0.1),
@@ -620,7 +628,7 @@ class consumerProducerSurplus(MovingCameraScene):
             Uncreate(supplyFunc),
             Unwrite(supplyLabel, run_time = 1, lag_ratio = 0.1),
             Unwrite(eqPtLbl, run_time = 1, lag_ratio = 0.1),
-            ReplacementTransform(yLab1, yLab2),
+            ReplacementTransform(yLab1, yLab3),
             ReplacementTransform(xLab1, xLab2),
         )
         supplyFunc.restore()
@@ -765,6 +773,8 @@ class consumerProducerSurplus(MovingCameraScene):
             dotTrack.animate.set_value(0.4178),
             Uncreate(demandFuncFull),
         )
+        self.add(yLab2)
+        self.remove(yLab3)
         self.wait()
 
         def get_lineFake():
@@ -1027,6 +1037,92 @@ class consumerProducerSurplus(MovingCameraScene):
             TransformMatchingTex(line1, lineCartel),
             proSur.animate.shift(LEFT + DOWN * 0.3),
             dotTrack.animate.set_value(0.3),
+        )
+
+        self.wait()
+
+        self.play(
+            yLab2.animate.set_color(YELLOW),
+            run_time = 0.5
+        )
+        self.play(
+            yLab2.animate.set_color(WHITE),
+            run_time = 0.5
+        )
+
+        self.wait()
+
+        def get_rectangleC():
+            polygon = Polygon(
+                *[
+                    axes.c2p(*i)
+                    for i in self.get_rectangle_corners(
+                        (0, 0), (dotTrack.get_value(), dotTrack.get_value()**2)
+                    )
+                ]
+            )
+            polygon.stroke_width = 1
+            polygon.set_fill(GREEN, opacity = 0.5)
+            polygon.set_stroke(YELLOW)
+            return polygon
+
+        def get_area4C():
+            return axes.get_area(demandFunc2, [0, dotTrack.get_value()], bounded_graph = lineFake2, color = BLUE, opacity = 0.5)
+
+        def get_area2C():
+            return axes.get_area(supplyFunc, [0, dotTrack.get_value()], bounded_graph = lineFake2, color = LIGHT_PINK, opacity = 0.5)
+
+
+        fakearea4C = get_area4C().set_fill(YELLOW, opacity = 1).set_z_index(502)
+        fakepolyC = get_rectangleC().set_fill(RED, opacity = 1).set_z_index(502)
+
+        fakearea4C2 = get_area4C().set_fill(RED, opacity = 1).set_z_index(502)
+        fakearea2C2 = get_area2C().set_fill(RED, opacity = 1).set_z_index(502)
+
+        fakearea4C3 = get_area4C().set_fill(GREEN, opacity = 1).set_z_index(502)
+
+        self.play(
+            FadeIn(fakearea4C2),
+            FadeIn(fakearea2C2),
+            run_time = 0.5
+        )
+
+        self.wait(0.5)
+
+        self.play(
+            FadeOut(fakearea4C2),
+            FadeOut(fakearea2C2),
+            run_time = 0.5
+        )
+
+        self.wait(0.5)
+
+        self.play(
+            FadeIn(fakearea4C3),
+            run_time = 0.5
+        )
+
+        self.wait(0.5)
+
+        self.play(
+            FadeOut(fakearea4C3),
+            run_time = 0.5
+        )
+
+        self.wait(0.5)
+
+        self.play(
+            FadeIn(fakearea4C),
+            FadeIn(fakepolyC),
+            run_time = 0.5
+        )
+
+        self.wait(0.5)
+        
+        self.play(
+            FadeOut(fakearea4C),
+            FadeOut(fakepolyC),
+            run_time = 0.5
         )
 
         self.wait()
