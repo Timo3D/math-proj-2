@@ -387,7 +387,7 @@ class consumerProducerSurplus(MovingCameraScene):
         ]
 
     def construct(self):
-        consumer0, andProducerSurplus = line1 = Tex("Consumer", " and Producer Surplus")
+        consumer0, _and, Producer, Surplus = line1 = Tex("Consumer", " and ", "Producer", " Surplus")
 
         self.play(Write(line1))
         self.wait()
@@ -812,6 +812,9 @@ class consumerProducerSurplus(MovingCameraScene):
         def get_lineFake2():
             return axes.plot(lambda x: dotTrack.get_value()**2, x_range = [0, 1], color = BLACK)
 
+        def get_lineFake2C():
+            return axes.plot(lambda x:1 / (dotTrack.get_value() + 1)**5, x_range = [0, 1], color = BLACK)
+
         def get_area2():
             return axes.get_area(supplyFunc, [0, dotTrack.get_value()], bounded_graph = lineFake2, color = LIGHT_PINK, opacity = 0.5)
 
@@ -820,6 +823,8 @@ class consumerProducerSurplus(MovingCameraScene):
             
         lineFake2 = always_redraw(get_lineFake2)
         lineFake2.set_z_index(-5)
+        lineFake2C = always_redraw(get_lineFake2C)
+        lineFake2C.set_z_index(-5)
         area2 = always_redraw(get_area2)
         area3 = always_redraw(get_area3)
         
@@ -1032,7 +1037,10 @@ class consumerProducerSurplus(MovingCameraScene):
             Uncreate(demandFuncFull2),
         )
 
-        consumer, cartel = lineCartel = Tex("Consumer", " Cartel").move_to(UP*3)
+        self.wait()
+
+        consumer, cartel = lineCartel = Tex("Producer", " Cartel").move_to(UP*3)
+
         self.play(
             TransformMatchingTex(line1, lineCartel),
             proSur.animate.shift(LEFT + DOWN * 0.3),
@@ -1149,4 +1157,372 @@ class consumerProducerSurplus(MovingCameraScene):
             )
         )
         
+        self.wait()
+
+class consumerProducerSurplus2(MovingCameraScene):
+    def get_rectangle_corners(self, bottom_left, top_right):
+        return [
+            (top_right[0], top_right[1]),
+            (bottom_left[0], top_right[1]),
+            (bottom_left[0], bottom_left[0]),
+            (top_right[0], bottom_left[0]),
+        ]
+
+    def construct(self):
+        consumer0, _and, Producer, Surplus = line1 = Tex("Consumer", " and ", "Producer", " Surplus")
+
+        self.add(line1)
+
+        axes = Axes(
+            x_range=[0, 1],
+            y_range=[0, 1],
+            axis_config={"color": GREEN},
+            tips = True,
+        )
+        axes.add_coordinates()
+
+        demandFunc = axes.plot(
+            lambda x: 1 / (x + 1)**5,
+            x_range = [0, 1],
+            color = BLUE,
+        )
+        demandLabel = axes.get_graph_label(demandFunc, "Demand\\,Function")
+        demandLabel.move_to(UP * 2 + LEFT * 3)
+
+        supplyFunc = axes.plot(
+            lambda x: x**2,
+            x_range = [0, 1],
+            color = RED,
+        )
+        supplyLabel = axes.get_graph_label(supplyFunc, "Supply\\,Function", direction = DL * 3 + LEFT * 3)
+
+        labels = axes.get_axis_labels(
+            x_label = Tex("Quantity"),
+            y_label = Tex("Price"),
+        )
+
+        self.add(
+            axes,
+            labels
+        )
+
+        self.add(
+            line1.move_to(UP * 3),
+            demandFunc,
+            demandLabel,
+            supplyFunc,
+            supplyLabel,
+        )
+
+        # self.wait()
+
+        dotTrack = ValueTracker(0.4178)
+
+        def get_rectangle():
+            polygon = Polygon(
+                *[
+                    axes.c2p(*i)
+                    for i in self.get_rectangle_corners(
+                        (0, 0), (dotTrack.get_value(), dotTrack.get_value()**2)
+                    )
+                ]
+            )
+            polygon.stroke_width = 1
+            polygon.set_fill(RED, opacity = 1)
+            polygon.set_stroke(RED)
+            return polygon
+
+        dot = Dot(axes.i2gp(dotTrack.get_value(), supplyFunc))
+        dot.set_z_index(1001)
+        f_always(
+            dot.move_to,
+            lambda: axes.i2gp(dotTrack.get_value(), demandFunc)
+        )
+
+        def get_lines2():
+            return axes.get_lines_to_point(axes.i2gp(dotTrack.get_value(), demandFunc), color = YELLOW).set_z_index(400)
+        lines2 = always_redraw(get_lines2)
+
+        def get_xLab1():
+            return MathTex("q_s").next_to(axes.c2p(dotTrack.get_value(), 0), DOWN)
+
+        def get_yLab1():
+            return MathTex("p_s").next_to(axes.c2p(0, 1 / (dotTrack.get_value() + 1)**5), LEFT)
+        
+        yLab1 = always_redraw(get_yLab1)
+        xLab1 = always_redraw(get_xLab1)
+
+        def get_yLab2():
+            return MathTex("p_s").next_to(axes.c2p(0, dotTrack.get_value()**2), LEFT)
+        
+        yLab2 = always_redraw(get_yLab2)
+
+        self.add(
+            dot,
+            lines2,
+            yLab1,
+            xLab1,
+        )
+
+        proSur = Tex("Producer Surplus", color = LIGHT_PINK)
+        proSur.move_to(DOWN * 2.5 + RIGHT * 0.7),
+        consSur = Tex("Consumer Surplus", color = BLUE)
+        consSur.move_to(LEFT * 1.6)
+
+        self.add(
+            proSur,
+            consSur,
+        )
+
+        producer, cartel = lineProducer = Tex("Producer", " Cartel").move_to(UP*3)
+
+        def get_lineFake2():
+            return axes.plot(lambda x: 1 / (dotTrack.get_value() + 1)**5, x_range = [0, 1], color = BLACK)
+        lineFake2 = always_redraw(get_lineFake2)
+        lineFake2.set_z_index(-5)
+        self.add(lineFake2)
+
+        def get_area2():
+            return axes.get_area(supplyFunc, [0, dotTrack.get_value()], bounded_graph = lineFake2, color = LIGHT_PINK, opacity = 0.5)
+        area2 = always_redraw(get_area2)
+
+        def get_area4():
+            return axes.get_area(demandFunc, [0, dotTrack.get_value()], bounded_graph = lineFake2, color = BLUE, opacity = 0.5)
+        area4 = always_redraw(get_area4)
+
+        self.add(
+            area2,
+            area4,
+        )
+
+        self.play(
+            TransformMatchingTex(line1, lineProducer),
+            proSur.animate.shift(LEFT + DOWN * 0.3),
+            dotTrack.animate.set_value(0.3),
+        )
+
+        self.wait()
+
+        framebox1 = SurroundingRectangle(xLab1, buff = .1)
+        self.play(Create(framebox1), run_time = 0.5)
+        self.wait(0.5)
+        self.play(FadeOut(framebox1), run_time = 0.5)
+
+        framebox2 = SurroundingRectangle(yLab1, buff = .1)
+        self.play(Create(framebox2), run_time = 0.5)
+        self.wait(0.5)
+        self.play(FadeOut(framebox2), run_time = 0.5)
+
+        def get_areaDiff():
+            return axes.get_area(demandFunc, [0.3, 0.4178], bounded_graph = supplyFunc, color = RED, opacity = 1).set_z_index(500)
+        areaDiff = get_areaDiff()
+
+        def get_areaTSG():
+            return axes.get_area(demandFunc, [0, 0.3], bounded_graph = supplyFunc, color = YELLOW, opacity = 1).set_z_index(500)
+        areaTSG = get_areaTSG()
+
+        totalSG = Tex("Total Social Gain", color = YELLOW).shift(UP + LEFT * 2.5)
+
+        self.wait()
+
+        self.play(
+            FadeIn(areaTSG),
+            Write(totalSG),
+            run_time = 0.5
+        )
+        self.wait(0.5)
+        self.play(
+            FadeIn(areaDiff),
+            run_time = 0.5
+        )
+        self.wait(0.5)
+        self.play(
+            FadeOut(areaTSG),
+            FadeOut(areaDiff),
+            FadeOut(totalSG),
+            run_time = 0.5
+        )
+
+        self.wait()
+
+        self.play(
+            dotTrack.animate.set_value(0.25),
+            proSur.animate.shift(LEFT * 0.6)
+        )
+        self.play(
+            dotTrack.animate.set_value(0.2),
+            proSur.animate.shift(LEFT * 0.6)
+        )
+        self.play(
+            dotTrack.animate.set_value(0.1),
+            proSur.animate.shift(LEFT * 1.2),
+            consSur.animate.shift(UL * 1.2)
+        )
+        self.wait(0.5)
+        self.play(
+            dotTrack.animate.set_value(0.4178),
+            proSur.animate.shift(RIGHT * 2.4),
+            consSur.animate.shift(DR * 1.2),
+            run_time = 0.3
+        )
+
+        self.wait()
+
+        consumer, cartel = lineCartel = Tex("Consumer", " Cartel").move_to(UP*3)
+
+        self.play(TransformMatchingTex(lineProducer, lineCartel))
+
+        self.wait()
+
+        def get_lineFake2C():
+            return axes.plot(lambda x: dotTrack.get_value()**2, x_range = [0, 1], color = BLACK)
+        lineFake2C = always_redraw(get_lineFake2C)
+        lineFake2C.set_z_index(-5)
+        self.remove(lineFake2)
+        self.add(lineFake2C)
+
+        def get_area2C():
+            return axes.get_area(supplyFunc, [0, dotTrack.get_value()], bounded_graph = lineFake2C, color = LIGHT_PINK, opacity = 0.5)
+        area2C = always_redraw(get_area2C)
+
+        def get_area4C():
+            return axes.get_area(demandFunc, [0, dotTrack.get_value()], bounded_graph = lineFake2C, color = BLUE, opacity = 0.5)
+        area4C = always_redraw(get_area4C)
+
+        self.add(
+            area2C,
+            area4C,
+        )
+        self.remove(
+            area2,
+            area4,
+        )
+
+
+        dot2 = Dot(axes.i2gp(dotTrack.get_value(), supplyFunc))
+        dot2.set_z_index(1001)
+        f_always(
+            dot2.move_to,
+            lambda: axes.i2gp(dotTrack.get_value(), supplyFunc)
+        )
+        self.add(dot2)
+        self.remove(dot)
+
+        def get_lines2F():
+            return axes.get_lines_to_point(axes.i2gp(dotTrack.get_value(), supplyFunc), color = YELLOW).set_z_index(400)
+        lines2F = always_redraw(get_lines2F)
+        self.add(lines2F)
+        self.remove(lines2)
+
+        def get_area2F():
+            return axes.get_area(supplyFunc, [0, dotTrack.get_value()], bounded_graph = lineFake2C, color = LIGHT_PINK, opacity = 0.5)
+        area2F = always_redraw(get_area2F)
+
+        def get_area4F():
+            return axes.get_area(demandFunc, [0, dotTrack.get_value()], bounded_graph = lineFake2C, color = BLUE, opacity = 0.5)
+        area4F = always_redraw(get_area4F)
+
+        self.add(
+            area2F,
+            area4F,
+            yLab2,
+        )
+        self.remove(
+            area2C,
+            area4C,
+            yLab1,
+        )
+
+        self.play(
+            dotTrack.animate.set_value(0.3)
+        )
+
+        self.wait()
+
+        framebox3 = SurroundingRectangle(dot2, buff = .1)
+        self.play(Create(framebox3), run_time = 0.5)
+        self.wait(0.5)
+        self.play(FadeOut(framebox3), run_time = 0.5)
+
+        self.wait()
+
+        self.play(
+            FadeIn(areaTSG),
+            Write(totalSG),
+            run_time = 0.5
+        )
+        self.wait(0.5)
+        self.play(
+            FadeIn(areaDiff),
+            run_time = 0.5
+        )
+        self.wait(0.5)
+        self.play(
+            FadeOut(areaTSG),
+            FadeOut(areaDiff),
+            FadeOut(totalSG),
+            run_time = 0.5
+        )
+
+        self.wait()
+
+        area4Inc = get_area4F().set_color(GREEN)
+
+        self.play(
+            FadeIn(area4Inc),
+            run_time = 0.5
+        )
+        self.wait(0.5)
+        polygon = get_rectangle()
+        self.play(
+            FadeIn(polygon),
+            run_time = 0.5
+        )
+        self.wait(0.5)
+        self.play(
+            FadeOut(area4Inc),
+            FadeOut(polygon),
+            run_time = 0.5
+        )
+
+        self.wait()
+
+        self.play(
+            AnimationGroup(
+                Unwrite(lineCartel),
+                Unwrite(labels),
+                Unwrite(supplyLabel),
+                Unwrite(demandLabel),
+                Unwrite(proSur, run_time = 1, lag_ratio = 0.1),
+                Unwrite(consSur, run_time = 1, lag_ratio = 0.1),
+                Uncreate(lineFake2, reversed = False),
+                Uncreate(area4F),
+                Uncreate(area2F),
+                Uncreate(lines2F),
+                Uncreate(dot2),
+                Uncreate(demandFunc),
+                Uncreate(supplyFunc),
+                Unwrite(xLab1),
+                Unwrite(yLab2),
+                Uncreate(axes),
+                lag_ratio = 0.2
+            )
+        )
+
+        self.wait()
+
+class Conclusion(MovingCameraScene):
+    def construct(self):
+        line1 = Tex("Conclusion")
+
+        self.play(Write(line1))
+        self.wait(0.5)
+        self.play(line1.animate.move_to(UP * 3))
+
+        self.wait(0.5)
+
+        testTex = Tex("accounting, inventory management, marketing, sales forecasting, financial analysis, etc")
+        self.add(testTex)
+        self.play(testTex.animate.apply_complex_function(np.exp), run_time=5)
+
         self.wait()
